@@ -1,0 +1,30 @@
+﻿version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: subs
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  bot:
+    build: .
+    command: python -m app.bot
+    env_file: .env
+    depends_on:
+      - db
+
+  worker:
+    build: .
+    command: python -m app.worker
+    env_file: .env
+    depends_on:
+      - db
+
+volumes:
+  pgdata:

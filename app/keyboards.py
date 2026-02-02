@@ -62,3 +62,15 @@ def how_cancel_kb(sub_id: str) -> InlineKeyboardMarkup:
     kb.button(text="↩️ Назад", callback_data=f"sub:open:{sub_id}")
     kb.adjust(2, 2, 1)
     return kb.as_markup()
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+
+def bottom_menu_kb() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="➕ Добавить подписку"), KeyboardButton(text="📋 Все мои подписки")],
+            [KeyboardButton(text="ℹ️ Помощь")],
+        ],
+        resize_keyboard=True,
+        is_persistent=True,
+        input_field_placeholder="Выбери действие…",
+    )

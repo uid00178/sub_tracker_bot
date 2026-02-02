@@ -47,10 +47,11 @@ async def ensure_user(user_id: int) -> User:
             s.add(u)
             await s.commit()
         return u
-
+        
 async def start_menu(message: Message):
     await ensure_user(message.from_user.id)
-    await message.answer("Выбери действие:", reply_markup=main_menu_kb())
+    await message.answer("Выбери действие:", reply_markup=bottom_menu_kb())
+
 
 async def cb_menu_add(cb: CallbackQuery, state: FSMContext):
     await cb.answer()
@@ -461,10 +462,45 @@ async def cb_ok(cb: CallbackQuery):
 
     await cb.message.answer("Принято ✅")
 
+from aiogram.types import Message, CallbackQuery
+from aiogram.fsm.context import FSMContext
+
+async def show_main_menu(message: Message):
+    await message.answer("Выбери действие:", reply_markup=bottom_menu_kb())
+
+async def start_add_subscription(message: Message, state: FSMContext):
+    # сюда перенеси то, что сейчас делает cb_menu_add
+    # пример:
+    await state.clear()
+    await state.set_state(AddSub.service)
+    await message.answer("Какой сервис?", reply_markup=bottom_menu_kb())
+
+async def show_subscriptions(message: Message):
+    # сюда перенеси то, что сейчас делает cb_menu_list
+    await message.answer("Твои подписки:", reply_markup=bottom_menu_kb())
+
+async def cb_menu_add(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()
+    await start_add_subscription(callback.message, state)
+
+async def cb_menu_list(callback: CallbackQuery):
+    await callback.answer()
+    await show_subscriptions(callback.message)
+
+async def menu_add_text(message: Message, state: FSMContext):
+    await start_add_subscription(message, state)
+
+async def menu_list_text(message: Message):
+    await show_subscriptions(message)
+
+
 def setup(dp: Dispatcher):
     dp.message.register(start_menu, F.text.in_({"/start", "/menu"}))
     dp.callback_query.register(cb_menu_add, F.data == "menu:add")
     dp.callback_query.register(cb_menu_list, F.data == "menu:list")
+
+    dp.message.register(menu_add_text, F.text == "➕ Добавить подписку")
+    dp.message.register(menu_list_text, F.text == "📋 Все мои подписки")
 
     dp.message.register(add_name, AddSub.name)
     dp.message.register(add_amount, AddSub.amount)
@@ -487,3 +523,5 @@ def setup(dp: Dispatcher):
 
     dp.callback_query.register(cb_cancel_steps, F.data.startswith("cancel:"))
     dp.callback_query.register(cb_ok, F.data.startswith("ok:"))
+
+

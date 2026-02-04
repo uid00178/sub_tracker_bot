@@ -1,7 +1,7 @@
-﻿
 services:
   db:
     image: postgres:15
+    restart: unless-stopped
     environment:
       POSTGRES_DB: subs
       POSTGRES_USER: postgres
@@ -13,6 +13,7 @@ services:
 
   bot:
     build: .
+    restart: unless-stopped
     command: python -m app.bot
     env_file: .env
     depends_on:
@@ -20,6 +21,7 @@ services:
 
   worker:
     build: .
+    restart: unless-stopped
     command: python -m app.worker
     env_file: .env
     depends_on:
@@ -27,3 +29,4 @@ services:
 
 volumes:
   pgdata:
+
